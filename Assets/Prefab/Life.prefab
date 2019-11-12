@@ -104,7 +104,13 @@ MonoBehaviour:
   rotationPenalty: 0.001
   wallPenalty: 5
   cellPenalty: 10
-  foodGain: 15
+  scoreStep: 1
+  foodGain: 5
+  VisionRays: 20
+  score: 0
+  Hue: 0
+  Force: 0
+  Rotation: 0
 --- !u!50 &2650094771459296439
 Rigidbody2D:
   serializedVersion: 4

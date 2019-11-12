@@ -253,10 +253,14 @@ MonoBehaviour:
     type: 3}
   foodPrefab: {fileID: 9107960052040383011, guid: f6edb8487a746e01eba1aca649cd6069,
     type: 3}
+  MaxHP: 20
   RoomSize: 25
   remainingCells: 0
   FoodLimit: 500
   remainingFood: 0
+  FoodStep: 200
+  populationSize: 10
+  mutationRate: 0.3
 --- !u!4 &965053923
 Transform:
   m_ObjectHideFlags: 0

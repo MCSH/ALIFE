@@ -12,12 +12,13 @@ public class LifeController : MonoBehaviour
 
   public float visionRange = 20;
 
-  public float hp = 100;
+  public float hp;
   public float huePenalty = 0.001f;
   public float forcePenalty = 0.1f;
   public float rotationPenalty = 0.001f;
   public float wallPenalty = 5;
   public float cellPenalty = 10;
+  public float scoreStep = 1;
   public float foodGain = 15;
   private Master master;
   public int VisionRays = 20;
@@ -28,21 +29,29 @@ public class LifeController : MonoBehaviour
   public const float FoodHue = 119.0f / 360.0f;
   public const float WallHue = 197.0f / 360.0f;
 
-  private Brain brain;
+  public Brain brain;
+  public float score;
 
   // Start is called before the first frame update
+
+  void Awake()
+  {
+    brain = new Brain(this);
+  }
+
   void Start()
   {
     rb = this.GetComponent<Rigidbody2D>();
     spriteRenderer = this.GetComponent<SpriteRenderer>();
 
     master = GameObject.FindGameObjectsWithTag("GameController")[0].GetComponent<Master>();
-    master.addCell(this);
 
     vision = new float[VisionRays];
     visionStep = 60 / VisionRays;
 
-    brain = new Brain(this);
+    hp = master.MaxHP;
+
+    // brain = new Brain(this);
 
     // print(transform.rotation);
   }
@@ -60,8 +69,10 @@ public class LifeController : MonoBehaviour
 
     if (hp <= 0)
     {
-      master.removeCell(this);
-      Destroy(gameObject);
+      master.removeCell(gameObject);
+      // Destroy(gameObject);
+    } else {
+      score += scoreStep * Time.deltaTime;
     }
   }
 

@@ -22,38 +22,20 @@ public class Brain
     layer_size[2] = 3;
 
     weights = new float[layer_size.Length - 1][][];
-    for (int i = 0; i < weights.Length; i++)
-    {
-      weights[i] = new float[layer_size[i] + 1][];
-      for (int j = 0; j <= layer_size[i]; j++)
-      {
-        weights[i][j] = new float[layer_size[i + 1]];
-        for (int k = 0; k < layer_size[i + 1]; k++)
-        {
-          weights[i][j][k] = Random.value * 2 * MAX_WEIGHT - MAX_WEIGHT;
-        }
-      }
-    }
+
 
   }
 
   public void think(float[] vision)
   {
-
     float[] x = vision;
     for (int i = 0; i < weights.Length; i++)
     {
       x = layer(x, i);
     }
-    // TODO
-
     lc.Hue = x[0];
     lc.Force = x[1] * 2 - 1;
     lc.Rotation = x[2] * 2 - 1;
-
-    // lc.Hue = Random.value;
-    // lc.Force = Random.value * 2 - 1;
-    // lc.Rotation = Random.value * 2 - 1;
   }
 
   private float[] layer(float[] inp, int l)
@@ -78,6 +60,78 @@ public class Brain
   public static float sigmoid(float x)
   {
     return 1 / (1 + Mathf.Exp(-x));
+  }
+
+  public void ImportDNA(float[] dna)
+  {
+    // TODO
+    int counter = 0;
+    for (int i = 0; i < weights.Length; i++)
+    {
+      weights[i] = new float[layer_size[i] + 1][];
+      for (int j = 0; j <= layer_size[i]; j++)
+      {
+        weights[i][j] = new float[layer_size[i + 1]];
+        for (int k = 0; k < layer_size[i + 1]; k++)
+        {
+          weights[i][j][k] = dna[counter];
+          counter++;
+        }
+      }
+    }
+  }
+
+  public float[] ExportDNA()
+  {
+    // TODO
+    int size = 0;
+    for (int i = 0; i < weights.Length; i++)
+      size += (layer_size[i] + 1) * layer_size[i + 1];
+
+    float[] ans = new float[size]; // TODO size?!
+    int counter = 0;
+    for (int i = 0; i < weights.Length; i++)
+    {
+      for (int j = 0; j <= layer_size[i]; j++)
+      {
+        for (int k = 0; k < layer_size[i + 1]; k++)
+        {
+          ans[counter] = weights[i][j][k];
+          counter++;
+        }
+      }
+    }
+    return ans;
+  }
+
+  public void RandomDNA()
+  {
+    for (int i = 0; i < weights.Length; i++)
+    {
+      weights[i] = new float[layer_size[i] + 1][];
+      for (int j = 0; j <= layer_size[i]; j++)
+      {
+        weights[i][j] = new float[layer_size[i + 1]];
+        for (int k = 0; k < layer_size[i + 1]; k++)
+        {
+          weights[i][j][k] = Random.value * 2 * MAX_WEIGHT - MAX_WEIGHT;
+        }
+      }
+    }
+  }
+
+  public static float[] MergeDNA(float[] dna1, float[] dna2, float mutate)
+  {
+    float[] ans = new float[dna1.Length];
+
+    for (int i = 0; i < dna1.Length; i++)
+    {
+      ans[i] = Random.value < 0.5 ? dna1[i] : dna1[2];
+      if (Random.value < mutate)
+        ans[i] = Random.value * 2 * MAX_WEIGHT - MAX_WEIGHT;
+    }
+
+    return ans;
   }
 
 }
