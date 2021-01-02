@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-public class LifeController : MonoBehaviour
+public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownHandler, IPointerUpHandler
 {
+
+  public GameObject corpsePrefab;
 
   private Rigidbody2D rb;
   private SpriteRenderer spriteRenderer;
@@ -20,6 +23,7 @@ public class LifeController : MonoBehaviour
   public float cellPenalty = 10;
   public float scoreStep = 1;
   public float foodGain = 15;
+  public float corpseGain = 50;
   private Master master;
   public int VisionRays = 20;
   private int visionStep;
@@ -28,6 +32,7 @@ public class LifeController : MonoBehaviour
 
   public const float FoodHue = 119.0f / 360.0f;
   public const float WallHue = 197.0f / 360.0f;
+  public const float CorpseHue = 10.0f / 360.0f;
 
   public Brain brain;
   public float score;
@@ -60,6 +65,7 @@ public class LifeController : MonoBehaviour
   void Update()
   {
 
+    if(master.paused) return;
     // living penalty
 
     hp -= Mathf.Abs(huePenalty * Hue);
@@ -70,6 +76,7 @@ public class LifeController : MonoBehaviour
     if (hp <= 0)
     {
       master.removeCell(gameObject);
+      Instantiate(corpsePrefab, transform.position, Quaternion.identity);
       // Destroy(gameObject);
     } else {
       score += scoreStep * Time.deltaTime;
@@ -78,6 +85,7 @@ public class LifeController : MonoBehaviour
 
   void FixedUpdate()
   {
+    if(master.paused) return;
     //   RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.Up);
     Quaternion.AngleAxis(30, Vector3.up);
     float vs = transform.eulerAngles.z - visionStep * VisionRays / 2;
@@ -102,6 +110,10 @@ public class LifeController : MonoBehaviour
         else if (hit.collider.tag == "food")
         {
           vision[i] = FoodHue;
+        }
+        else if(hit.collider.tag == "corpse")
+        {
+            vision[i] = CorpseHue;
         }
 
         vs += visionStep;
@@ -131,6 +143,7 @@ public class LifeController : MonoBehaviour
 
   void OnCollisionEnter2D(Collision2D collision)
   {
+    if(master.paused) return;
     // print("collision");
     if (collision.gameObject.tag == "cell")
     {
@@ -151,6 +164,11 @@ public class LifeController : MonoBehaviour
     {
       hp += foodGain;
       master.removeFood(collision.gameObject);
+    }
+    else if (collision.gameObject.tag == "corpse")
+    {
+      hp += corpseGain;
+      Destroy(collision.gameObject);
     }
   }
 
@@ -178,4 +196,14 @@ public class LifeController : MonoBehaviour
   //       return Random.value * 2 - 1;
   //     }
   //   }
+
+  public void OnPointerClick(PointerEventData pointerEventData){
+      master.selectCell(this);
+  }
+
+  public void OnPointerDown(PointerEventData eventData){
+  }
+
+  public void OnPointerUp(PointerEventData eventData){
+  }
 }

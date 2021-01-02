@@ -8,6 +8,14 @@ public class Master : MonoBehaviour
   public GameObject lifePrefab;
   public GameObject wallPrefab;
   public GameObject foodPrefab;
+  public GameObject uiCellPrefab;
+  public GameObject generationText;
+  public GameObject descriptiveText;
+  public GameObject nCameraObj;
+
+  private Camera nCamera;
+
+  public LifeController selected;
 
   public int MaxHP = 100;
 
@@ -25,8 +33,18 @@ public class Master : MonoBehaviour
 
   public float mutationRate = 0.3f;
 
+  private int generationCount = 0;
+
+  public bool paused = false;
+
+  public int nX = -2060, nY = -2025;
+  public int ncw = 5, nch = 5;
+
   void Start()
   {
+    nCamera = nCameraObj.GetComponent<Camera>();
+    nCamera.enabled = false;
+
     cells = new LifeController[populationSize];
     for (int i = 0; i < populationSize; i++)
     {
@@ -50,6 +68,50 @@ public class Master : MonoBehaviour
 
     GenerateFood(FoodLimit);
 
+    incGenerationText();
+    setDescriptiveText("Nothing Selected.");
+
+    createBrainUI();
+  }
+
+  private UICell[][] uicells;
+
+  private void createBrainUI(){
+      int s = cells[0].brain.layer_size.Length;
+      uicells = new UICell[s][];
+
+      for(int i = 0; i < s; i++){
+          uicells[i] = new UICell[cells[0].brain.layer_size[i]];
+      }
+
+      for(int i = 0; i < s; i ++){
+          for(int j = 0; j < uicells[i].Length; j++){
+              // Instantiate the UI
+              int x = nX + (2* i+1)*ncw;
+              int y = nY + (2* j+1) * nch;
+              GameObject go = Instantiate(uiCellPrefab, new Vector3(x, y, 0), Quaternion.identity);
+              uicells[i][j] = go.GetComponent<UICell>();
+          }
+      }
+  }
+
+  public void selectCell(LifeController lc){
+      selected = lc;
+      if(lc != null){
+          nCamera.enabled = true;
+      } else {
+          nCamera.enabled = false;
+          setDescriptiveText("Nothing Selected.");
+      }
+  }
+
+  private void updateUICells(){
+      if(selected == null) return;
+      for(int i = 0; i < uicells.Length; i++){
+          for(int j = 0; j < uicells[i].Length; j++){
+              uicells[i][j].hue = selected.brain.activation[i][j];
+          }
+      }
   }
 
   public void removeCell(GameObject o)
@@ -79,6 +141,20 @@ public class Master : MonoBehaviour
       // TODO
       GenerateFood(FoodLimit - remainingFood);
     }
+
+    if(selected != null){
+        setDescriptiveText("HP: " + selected.hp);
+    }
+
+    if(Input.GetKeyDown("space")){
+        Debug.Log("Pause");
+        paused = !paused;
+    }
+
+    if(selected && selected.hp <= 0)
+        selectCell(null);
+
+    updateUICells();
   }
 
   void Stop()
@@ -103,9 +179,22 @@ public class Master : MonoBehaviour
     remainingFood += amount;
   }
 
+  void incGenerationText(){
+    generationCount++;
+    UnityEngine.UI.Text gt = generationText.GetComponent<UnityEngine.UI.Text>();
+    gt.text = "Generation " + generationCount;
+  }
+
+  void setDescriptiveText(string str){
+    UnityEngine.UI.Text dt = descriptiveText.GetComponent<UnityEngine.UI.Text>();
+    dt.text = str;
+  }
+
   void Breed()
   {
-    print("Breeding");
+    selectCell(null);
+    incGenerationText();
+    print("Breeding " + generationCount);
 
     // int j;
     for (int i = 1; i < populationSize; i++)

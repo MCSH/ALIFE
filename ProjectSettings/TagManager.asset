@@ -7,6 +7,8 @@ TagManager:
   - cell
   - wall
   - food
+  - ncamera
+  - corpse
   layers:
   - Default
   - TransparentFX
