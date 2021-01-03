@@ -104,11 +104,15 @@ MonoBehaviour:
   huePenalty: 0.001
   forcePenalty: 0.1
   rotationPenalty: 0.001
+  wallConstPenalty: 25
   wallPenalty: 5
   cellPenalty: 10
   scoreStep: 1
   foodGain: 5
+  corpseGain: 50
   VisionRays: 20
+  scale: 1
+  maxScale: 2
   score: 0
   Hue: 0
   Force: 0

@@ -16,10 +16,12 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
   public float visionRange = 20;
 
   public float hp;
+  public float scalePenalty = 0.1f;
   public float huePenalty = 0.001f;
   public float forcePenalty = 0.1f;
   public float rotationPenalty = 0.001f;
-  public float wallPenalty = 5;
+  public float wallConstPenalty = 25;
+  public float wallPenalty = 25;
   public float cellPenalty = 10;
   public float scoreStep = 1;
   public float foodGain = 15;
@@ -27,6 +29,12 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
   private Master master;
   public int VisionRays = 20;
   private int visionStep;
+
+  private Vector3 baseScale = new Vector3(5, 5, 1);
+
+  // 1 - 5
+  public float scale = 1;
+  public float maxScale = 2;
 
   private float[] vision;
 
@@ -54,7 +62,7 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     vision = new float[VisionRays];
     visionStep = 60 / VisionRays;
 
-    hp = master.MaxHP;
+    hp = master.startingHP;
 
     // brain = new Brain(this);
 
@@ -71,6 +79,9 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     hp -= Mathf.Abs(huePenalty * Hue);
     hp -= Mathf.Abs(forcePenalty * Force);
     hp -= Mathf.Abs(rotationPenalty * Rotation);
+    hp -= Mathf.Abs(scalePenalty * (scale - 1));
+
+    if(hp > master.MaxHP) hp = master.MaxHP;
 
 
     if (hp <= 0)
@@ -81,6 +92,11 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     } else {
       score += scoreStep * Time.deltaTime;
     }
+
+    if(scale < 1) scale = 1;
+    if(scale > maxScale) scale = maxScale;
+
+    this.transform.localScale = baseScale * scale;
   }
 
   void FixedUpdate()
@@ -126,7 +142,10 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
 
     }
 
-    brain.think(vision);
+    float healthP = hp / 100;
+    if(healthP >1) healthP = 1;
+
+    brain.think(vision, healthP);
 
     float hue = Hue;
 
@@ -147,16 +166,13 @@ public class LifeController : MonoBehaviour, IPointerClickHandler, IPointerDownH
     // print("collision");
     if (collision.gameObject.tag == "cell")
     {
-      float penalty = Mathf.Abs(cellPenalty * collision.gameObject.GetComponent<LifeController>().Force);
-
-      //   print("Penalty " + penalty);
-
-      hp -= Mathf.Abs(cellPenalty * collision.gameObject.GetComponent<LifeController>().Force);
+      hp -= Mathf.Abs(cellPenalty * collision.gameObject.GetComponent<LifeController>().Force * scale);
       // TODO
     }
     else if (collision.gameObject.tag == "wall")
     {
       hp -= Mathf.Abs(wallPenalty * Force);
+      hp -= wallConstPenalty;
       //   hp -= Force;
       // TODO
     }

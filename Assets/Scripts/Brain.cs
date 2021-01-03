@@ -7,13 +7,13 @@ public class Brain
 {
   private LifeController lc;
 
-  private const int HIDDEN_SIZE = 10;
+  private const int HIDDEN_SIZE = 12;
   private const int MAX_WEIGHT = 10;
   public int[] layer_size = new int[3];
   private float[][][] weights;
   public float[][] activation;
 
-  private int MEMORY_SIZE = 10;
+  private int MEMORY_SIZE = 15;
   private float[] memory;
   private float[] x;
 
@@ -22,12 +22,12 @@ public class Brain
   {
     this.lc = lc;
 
-    layer_size[0] = lc.VisionRays + MEMORY_SIZE;
+    layer_size[0] = 1 + lc.VisionRays + MEMORY_SIZE;
     layer_size[1] = HIDDEN_SIZE;
-    layer_size[2] = 3 + MEMORY_SIZE;
+    layer_size[2] = 4 + MEMORY_SIZE;
 
     this.memory = new float[MEMORY_SIZE];
-    this.x = new float[lc.VisionRays + MEMORY_SIZE];
+    this.x = new float[1 + lc.VisionRays + MEMORY_SIZE];
 
     weights = new float[layer_size.Length - 1][][];
 
@@ -37,14 +37,15 @@ public class Brain
     }
   }
 
-  public void think(float[] vision)
+  public void think(float[] vision, float healthP)
   {
     float []x = this.x;
+    x[0] = healthP;
     for(int i =0; i < vision.Length; i++){
-        x[i] = vision[i];
+        x[i + 1] = vision[i];
     }
     for(int i = 0; i < memory.Length; i++){
-        x[i + vision.Length] = memory[i];
+        x[i + vision.Length +1] = memory[i];
     }
 
     for (int i = 0; i < weights.Length; i++)
@@ -58,11 +59,12 @@ public class Brain
         activation[2][j] = x[j];
     }
     for(int j = 0; j < MEMORY_SIZE; j++){
-        memory[j] = activation[2][3+j];
+        memory[j] = activation[2][4+j];
     }
     lc.Hue = x[0];
     lc.Force = x[1] * 2 - 1;
     lc.Rotation = x[2] * 2 - 1;
+    lc.scale = x[3] * (lc.maxScale - 1) + 1;
   }
 
   private float[] layer(float[] inp, int l)

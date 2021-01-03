@@ -18,6 +18,7 @@ public class Master : MonoBehaviour
   public LifeController selected;
 
   public int MaxHP = 100;
+  public int startingHP = 20;
 
   public int RoomSize = 10;
 
@@ -225,7 +226,7 @@ public class Master : MonoBehaviour
     {
       cells[i].gameObject.SetActive(true);
       cells[i].transform.position = new Vector3(Random.Range(-RoomSize + 5, RoomSize - 5), Random.Range(-RoomSize + 5, RoomSize - 5), 0);
-      cells[i].hp = MaxHP;
+      cells[i].hp = startingHP;
       remainingCells++;
     }
 
